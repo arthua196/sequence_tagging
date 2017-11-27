@@ -71,9 +71,9 @@ class Config():
     use_pretrained = True
 
     # dataset
-    # filename_dev = "data/coNLL/eng/eng.testa.iob"
-    # filename_test = "data/coNLL/eng/eng.testb.iob"
-    # filename_train = "data/coNLL/eng/eng.train.iob"
+    filename_dev = "data/conll2003/en/valid.txt"
+    filename_test = "data/conll2003/en/test.txt"
+    filename_train = "data/conll2003/en/train.txt"
 
     filename_dev = filename_test = filename_train = "data/test.txt" # test
 
