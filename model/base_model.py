@@ -134,7 +134,7 @@ class BaseModel(object):
 
         """
         self.logger.info("Testing model over test set")
-        metrics, metrics2 = self.run_evaluate(test)
+        metrics, metrics2 = self.run_evaluate(test, self.config.write_mistake_2file)
         msg = " - ".join(["{} {:04.2f}".format(k, v)
                           for k, v in metrics.items()])
         msg2 = " - ".join(["{} {:04.2f}".format(k, v)

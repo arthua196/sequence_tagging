@@ -60,6 +60,12 @@ class Config():
     dir_model = dir_output + "model.weights/"
     path_log = dir_output + "log.txt"
 
+    # for output mistakes in evaluate
+    write_mistake_2file = True
+    filename_wrong_preds = dir_output + "wrong_preds.txt"
+    filename_not_preds = dir_output + "not_preds.txt"
+
+
     # embeddings
     dim_word = 300
     dim_char = 100
