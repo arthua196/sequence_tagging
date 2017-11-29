@@ -24,13 +24,18 @@ def main():
     processing_word = get_processing_word(lowercase=True)
 
     # Generators
-    dev   = CoNLLDataset(config.filename_dev, processing_word)
-    test  = CoNLLDataset(config.filename_test, processing_word)
+    dev = CoNLLDataset(config.filename_dev, processing_word)
+    test = CoNLLDataset(config.filename_test, processing_word)
     train = CoNLLDataset(config.filename_train, processing_word)
+
+    # Build the TrainSet word vocab
+    train_set_words, _ = get_vocabs([train])
+    write_vocab(train_set_words, config.filename_trainset_words)
 
     # Build Word and Tag vocab
     vocab_words, vocab_tags = get_vocabs([train, dev, test])
     vocab_glove = get_glove_vocab(config.filename_glove)
+    write_vocab(vocab_glove, config.filename_embedding_words)
 
     vocab = vocab_words & vocab_glove
     vocab.add(UNK)
@@ -43,7 +48,7 @@ def main():
     # Trim GloVe Vectors
     vocab = load_vocab(config.filename_words)
     export_trimmed_glove_vectors(vocab, config.filename_glove,
-                                config.filename_trimmed, config.dim_word)
+                                 config.filename_trimmed, config.dim_word)
 
     # Build and save char vocab
     train = CoNLLDataset(config.filename_train)

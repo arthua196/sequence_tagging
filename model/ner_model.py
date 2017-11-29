@@ -299,13 +299,17 @@ class NERModel(BaseModel):
             metrics: (dict) metrics["acc"] = 98.4, ...
 
         """
+        UNK = "$UNK$"
         accs = []
         correct_preds, total_correct, total_preds = 0., 0., 0.
+        correct_preds_ooxv, total_correct_ooxv, total_preds_ooxv = [0.] * 4, [0.] * 4, [0.] * 4
         for words, labels in minibatches(test, self.config.batch_size):
-            labels_pred, sequence_lengths = self.predict_batch(words)
+            char_ids, word_ids = zip(*words)
+            labels_pred, sequence_lengths = self.predict_batch(zip(char_ids, word_ids))
 
-            for lab, lab_pred, length in zip(labels, labels_pred,
-                                             sequence_lengths):
+            for sen, lab, lab_pred, length in zip(word_ids, labels, labels_pred,
+                                                  sequence_lengths):
+                sen = sen[:length]
                 lab = lab[:length]
                 lab_pred = lab_pred[:length]
                 accs += [a == b for (a, b) in zip(lab, lab_pred)]
@@ -318,12 +322,50 @@ class NERModel(BaseModel):
                 total_preds += len(lab_pred_chunks)
                 total_correct += len(lab_chunks)
 
-        p = correct_preds / total_preds if correct_preds > 0 else 0
-        r = correct_preds / total_correct if correct_preds > 0 else 0
-        f1 = 2 * p * r / (p + r) if correct_preds > 0 else 0
+                def judge_ooxv(chunk):
+                    ootv = False
+                    ooev = False
+                    oobv = False
+                    for i in range(chunk[1], chunk[2]):
+                        if not sen[i] in self.config.processed_trainset_word:
+                            ootv = True
+                        if not sen[i] in self.config.processed_embedding_word:
+                            ooev = True
+                        if ootv and ooev:
+                            oobv = True
+                            break
+                    if oobv:
+                        return 0
+                    elif ooev:
+                        return 1
+                    elif ootv:
+                        return 2
+                    else:
+                        return 3
+
+                for chunk in lab_chunks:
+                    total_correct_ooxv[judge_ooxv(chunk)] += 1
+                for chunk in lab_pred_chunks:
+                    total_preds_ooxv[judge_ooxv(chunk)] += 1
+                for chunk in (lab_pred_chunks & lab_chunks):
+                    correct_preds_ooxv[judge_ooxv(chunk)] += 1
+
+        pp = correct_preds / total_preds if correct_preds > 0 else 0
+        rr = correct_preds / total_correct if correct_preds > 0 else 0
+        ff1 = 2 * pp * rr / (pp + rr) if correct_preds > 0 else 0
+        p, r, f1 = [0] * 4, [0] * 4, [0] * 4
+        for i in range(4):
+            p[i] = correct_preds_ooxv[i] / total_preds_ooxv[i] if correct_preds_ooxv[i] > 0 else 0
+            r[i] = correct_preds_ooxv[i] / total_correct_ooxv[i] if correct_preds_ooxv[i] > 0 else 0
+            f1[i] = 2 * p[i] * r[i] / (p[i] + r[i]) if correct_preds_ooxv[i] > 0 else 0
+
         acc = np.mean(accs)
 
-        return {"acc": 100 * acc, "f1": 100 * f1}
+        return {"acc": 100 * acc, "f1": 100 * ff1, "num": total_correct,
+                "oobv_num": total_correct_ooxv[0], "oobv_f1": f1[0] * 100,
+                "ooev_num": total_correct_ooxv[1], "ooev_f1": f1[1] * 100,
+                "ootv_num": total_correct_ooxv[2], "ootv_f1": f1[2] * 100,
+                "iv_num": total_correct_ooxv[3], "iv_f1": f1[3] * 100}
 
     def predict(self, words_raw):
         """Returns list of tags
