@@ -105,7 +105,7 @@ def get_vocabs(datasets):
     vocab_words = set()
     vocab_tags = set()
     for dataset in datasets:
-        for words, tags in dataset:
+        for words, tags, _ in dataset:
             vocab_words.update(words)
             vocab_tags.update(tags)
     print("- done. {} tokens".format(len(vocab_words)))
