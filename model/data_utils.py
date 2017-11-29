@@ -353,7 +353,7 @@ def minibatches(data, minibatch_size):
     for (x, y, z) in data:
         if len(x_batch) == minibatch_size:
             yield x_batch, y_batch, z_batch
-            x_batch, y_batch, z_batch = [], []
+            x_batch, y_batch, z_batch = [], [], []
 
         if type(x[0]) == tuple:
             x = zip(*x)
