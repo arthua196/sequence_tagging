@@ -269,7 +269,7 @@ class NERModel(BaseModel):
         prog = Progbar(target=nbatches)
 
         # iterate over dataset
-        for i, (words, labels) in enumerate(minibatches(train, batch_size)):
+        for i, (words, labels, raw_words) in enumerate(minibatches(train, batch_size)):
             fd, _ = self.get_feed_dict(words, labels, self.config.lr,
                                        self.config.dropout)
 
@@ -282,10 +282,12 @@ class NERModel(BaseModel):
             if i % 10 == 0:
                 self.file_writer.add_summary(summary, epoch * nbatches + i)
 
-        metrics = self.run_evaluate(dev)
+        metrics, metrics2 = self.run_evaluate(dev)
         msg = " - ".join(["{} {:04.2f}".format(k, v)
                           for k, v in metrics.items()])
-        self.logger.info(msg)
+        msg2 = " - ".join(["{} {:04.2f}".format(k, v)
+                           for k, v in metrics2.items()])
+        self.logger.info(msg + "\n" + msg2)
 
         return metrics["f1"]
 
@@ -303,11 +305,10 @@ class NERModel(BaseModel):
         accs = []
         correct_preds, total_correct, total_preds = 0., 0., 0.
         correct_preds_ooxv, total_correct_ooxv, total_preds_ooxv = [0.] * 4, [0.] * 4, [0.] * 4
-        for words, labels in minibatches(test, self.config.batch_size):
-            char_ids, word_ids = zip(*words)
-            labels_pred, sequence_lengths = self.predict_batch(zip(char_ids, word_ids))
+        for words, labels, raw_words in minibatches(test, self.config.batch_size):
+            labels_pred, sequence_lengths = self.predict_batch(words)
 
-            for sen, lab, lab_pred, length in zip(word_ids, labels, labels_pred,
+            for sen, lab, lab_pred, length in zip(raw_words, labels, labels_pred,
                                                   sequence_lengths):
                 sen = sen[:length]
                 lab = lab[:length]
@@ -327,9 +328,9 @@ class NERModel(BaseModel):
                     ooev = False
                     oobv = False
                     for i in range(chunk[1], chunk[2]):
-                        if not sen[i] in self.config.processed_trainset_word:
+                        if not sen[i].lower() in self.config.vocab_trainset_word:
                             ootv = True
-                        if not sen[i] in self.config.processed_embedding_word:
+                        if not sen[i].lower() in self.config.vocab_embedding_word:
                             ooev = True
                         if ootv and ooev:
                             oobv = True
@@ -361,8 +362,8 @@ class NERModel(BaseModel):
 
         acc = np.mean(accs)
 
-        return {"acc": 100 * acc, "f1": 100 * ff1, "num": total_correct,
-                "oobv_num": total_correct_ooxv[0], "oobv_f1": f1[0] * 100,
+        return {"acc": 100 * acc, "f1": 100 * ff1, "num": total_correct}, \
+               {"oobv_num": total_correct_ooxv[0], "oobv_f1": f1[0] * 100,
                 "ooev_num": total_correct_ooxv[1], "ooev_f1": f1[1] * 100,
                 "ootv_num": total_correct_ooxv[2], "ootv_f1": f1[2] * 100,
                 "iv_num": total_correct_ooxv[3], "iv_f1": f1[3] * 100}

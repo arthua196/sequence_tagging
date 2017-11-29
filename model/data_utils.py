@@ -1,7 +1,6 @@
 import numpy as np
 import os
 
-
 # shared global variables to be imported from model also
 UNK = "$UNK$"
 NUM = "$NUM$"
@@ -40,13 +39,14 @@ class CoNLLDataset(object):
         ```
 
     """
+
     def __init__(self, filename, processing_word=None, processing_tag=None,
                  max_iter=None):
         """
         Args:
             filename: path to the file
-            processing_words: (optional) function that takes a word as input
-            processing_tags: (optional) function that takes a tag as input
+            processing_word: (optional) function that takes a word as input
+            processing_tag: (optional) function that takes a tag as input
             max_iter: (optional) max number of sentences to yield
 
         """
@@ -56,30 +56,30 @@ class CoNLLDataset(object):
         self.max_iter = max_iter
         self.length = None
 
-
     def __iter__(self):
         niter = 0
         with open(self.filename, encoding="utf8") as f:
-            words, tags = [], []
+            raw_words, words, tags = [], [], []
             for line in f:
                 line = line.strip()
-                if (len(line) == 0 or line.startswith("-DOCSTART-")):
+                if len(line) == 0 or line.startswith("-DOCSTART-"):
                     if len(words) != 0:
                         niter += 1
                         if self.max_iter is not None and niter > self.max_iter:
                             break
-                        yield words, tags
-                        words, tags = [], []
+                        yield words, tags, raw_words
+                        raw_words, words, tags = [], [], []
                 else:
                     ls = line.split(' ')
-                    word, tag = ls[0],ls[-1]
+                    raw_word, tag = ls[0], ls[-1]
+                    word = raw_word
                     if self.processing_word is not None:
-                        word = self.processing_word(word)
+                        word = self.processing_word(raw_word)
                     if self.processing_tag is not None:
                         tag = self.processing_tag(tag)
+                    raw_words += [raw_word]
                     words += [word]
                     tags += [tag]
-
 
     def __len__(self):
         """Iterates once over the corpus to set and store length"""
@@ -235,7 +235,7 @@ def get_trimmed_glove_vectors(filename):
 
 
 def get_processing_word(vocab_words=None, vocab_chars=None,
-                    lowercase=False, chars=False, allow_unk=True):
+                        lowercase=False, chars=False, allow_unk=True):
     """Return lambda function that transform a word (string) into list,
     or tuple of (list, id) of int corresponding to the ids of the word and
     its corresponding characters.
@@ -248,6 +248,7 @@ def get_processing_word(vocab_words=None, vocab_chars=None,
                  = (list of char ids, word id)
 
     """
+
     def f(word):
         # 0. get chars of words
         if vocab_chars is not None and chars == True:
@@ -271,7 +272,7 @@ def get_processing_word(vocab_words=None, vocab_chars=None,
                 if allow_unk:
                     word = vocab_words[UNK]
                 else:
-                    raise Exception("Unknow key is not allowed. Check that "\
+                    raise Exception("Unknow key is not allowed. Check that " \
                                     "your vocab (tags?) is correct")
 
         # 3. return tuple char ids, word id
@@ -296,8 +297,8 @@ def _pad_sequences(sequences, pad_tok, max_length):
 
     for seq in sequences:
         seq = list(seq)
-        seq_ = seq[:max_length] + [pad_tok]*max(max_length - len(seq), 0)
-        sequence_padded +=  [seq_]
+        seq_ = seq[:max_length] + [pad_tok] * max(max_length - len(seq), 0)
+        sequence_padded += [seq_]
         sequence_length += [min(len(seq), max_length)]
 
     return sequence_padded, sequence_length
@@ -315,9 +316,9 @@ def pad_sequences(sequences, pad_tok, nlevels=1):
 
     """
     if nlevels == 1:
-        max_length = max(map(lambda x : len(x), sequences))
+        max_length = max(map(lambda x: len(x), sequences))
         sequence_padded, sequence_length = _pad_sequences(sequences,
-                                            pad_tok, max_length)
+                                                          pad_tok, max_length)
 
     elif nlevels == 2:
         max_length_word = max([max(map(lambda x: len(x), seq))
@@ -329,11 +330,11 @@ def pad_sequences(sequences, pad_tok, nlevels=1):
             sequence_padded += [sp]
             sequence_length += [sl]
 
-        max_length_sentence = max(map(lambda x : len(x), sequences))
+        max_length_sentence = max(map(lambda x: len(x), sequences))
         sequence_padded, _ = _pad_sequences(sequence_padded,
-                [pad_tok]*max_length_word, max_length_sentence)
+                                            [pad_tok] * max_length_word, max_length_sentence)
         sequence_length, _ = _pad_sequences(sequence_length, 0,
-                max_length_sentence)
+                                            max_length_sentence)
 
     return sequence_padded, sequence_length
 
@@ -348,19 +349,20 @@ def minibatches(data, minibatch_size):
         list of tuples
 
     """
-    x_batch, y_batch = [], []
-    for (x, y) in data:
+    x_batch, y_batch, z_batch = [], [], []
+    for (x, y, z) in data:
         if len(x_batch) == minibatch_size:
-            yield x_batch, y_batch
-            x_batch, y_batch = [], []
+            yield x_batch, y_batch, z_batch
+            x_batch, y_batch, z_batch = [], []
 
         if type(x[0]) == tuple:
             x = zip(*x)
         x_batch += [x]
         y_batch += [y]
+        z_batch += [z]
 
     if len(x_batch) != 0:
-        yield x_batch, y_batch
+        yield x_batch, y_batch, z_batch
 
 
 def get_chunk_type(tok, idx_to_tag):
