@@ -327,21 +327,21 @@ class NERModel(BaseModel):
                 not_preds = lab_chunks - (lab_chunks & lab_pred_chunks)
                 if write_mistake_2file:
                     fin = open(self.config.filename_wrong_preds, "a")
-                    fin.write(" ".join(sen)+"\n")
+                    fin.write(" ".join(sen) + "\n")
                     for chunk in wrong_preds:
                         chunk_word = ""
                         for i in range(chunk[1], chunk[2]):
                             chunk_word += sen[i] + " "
-                        fin.write(chunk_word+"\n")
+                        fin.write(chunk_word + " " + chunk[0] + "\n")
                     fin.write("\n\n")
                     fin.close()
                     fin = open(self.config.filename_not_preds, "a")
-                    fin.write(" ".join(sen)+"\n")
+                    fin.write(" ".join(sen) + "\n")
                     for chunk in not_preds:
                         chunk_word = ""
                         for i in range(chunk[1], chunk[2]):
                             chunk_word += sen[i] + " "
-                        fin.write(chunk_word+"\n")
+                        fin.write(chunk_word + " " + chunk[0] + "\n")
                     fin.write("\n\n")
                     fin.close()
 
