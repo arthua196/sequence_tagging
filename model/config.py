@@ -5,6 +5,8 @@ from .general_utils import get_logger
 from .data_utils import get_trimmed_glove_vectors, load_vocab, \
     get_processing_word
 
+LOGGER = get_logger(self.path_log)
+
 
 class Config():
     def __init__(self, load=True):
@@ -20,7 +22,7 @@ class Config():
             os.makedirs(self.dir_output)
 
         # create instance of logger
-        self.logger = get_logger(self.path_log)
+        self.logger = LOGGER
 
         # load if requested (default)
         if load:

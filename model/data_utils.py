@@ -261,8 +261,14 @@ def get_processing_word(vocab_words=None, vocab_chars=None,
         # 1. preprocess word
         if lowercase:
             word = word.lower()
-        if word.isdigit():
+        try:
+            word_num = list(word)
+            while "," in word_num:
+                word_num.remove(",")
+            float("".join(word_num))
             word = NUM
+        except ValueError:
+            pass
 
         # 2. get id of word
         if vocab_words is not None:
