@@ -110,6 +110,14 @@ class NERModel(BaseModel):
                     dtype=tf.float32,
                     trainable=self.config.train_embeddings)
 
+                if self.config.copy_embeddings:
+                    _word_embeddings_temp = tf.Variable(
+                        self.config.embeddings,
+                        name="_word_embeddings_temp",
+                        dtype=tf.float32,
+                        trainable=False)
+                    _word_embeddings = tf.concat([_word_embeddings, _word_embeddings_temp], axis=-1)
+
             word_embeddings = tf.nn.embedding_lookup(_word_embeddings,
                                                      self.word_ids, name="word_embeddings")
 
@@ -165,6 +173,7 @@ class NERModel(BaseModel):
             output = tf.nn.dropout(output, self.dropout)
 
         with tf.variable_scope("proj"):
+            # Notice! There is a rand number.
             W = tf.get_variable("W", dtype=tf.float32,
                                 shape=[2 * self.config.hidden_size_lstm, self.config.ntags])
 

@@ -94,6 +94,7 @@ class Config():
 
     # training
     train_embeddings = False
+    copy_embeddings = False
     nepochs = 15
     dropout = 0.5
     batch_size = 20
