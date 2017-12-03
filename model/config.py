@@ -63,7 +63,6 @@ class Config():
     # for output mistakes in evaluate
     write_mistake_2file = True
     filename_wrong_preds = dir_output + "wrong_preds.txt"
-    filename_not_preds = dir_output + "not_preds.txt"
 
 
     # embeddings

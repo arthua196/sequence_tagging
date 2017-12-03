@@ -335,24 +335,23 @@ class NERModel(BaseModel):
                 wrong_preds = lab_pred_chunks - (lab_chunks & lab_pred_chunks)
                 not_preds = lab_chunks - (lab_chunks & lab_pred_chunks)
                 if write_mistake_2file:
-                    fin = open(self.config.filename_wrong_preds, "a")
-                    fin.write(" ".join(sen) + "\n")
-                    for chunk in wrong_preds:
-                        chunk_word = ""
-                        for i in range(chunk[1], chunk[2]):
-                            chunk_word += sen[i] + " "
-                        fin.write(chunk_word + " " + chunk[0] + "\n")
-                    fin.write("\n\n")
-                    fin.close()
-                    fin = open(self.config.filename_not_preds, "a")
-                    fin.write(" ".join(sen) + "\n")
-                    for chunk in not_preds:
-                        chunk_word = ""
-                        for i in range(chunk[1], chunk[2]):
-                            chunk_word += sen[i] + " "
-                        fin.write(chunk_word + " " + chunk[0] + "\n")
-                    fin.write("\n\n")
-                    fin.close()
+                    if len(wrong_preds) != 0 or len(not_preds) != 0:
+                        fin = open(self.config.filename_wrong_preds, "a")
+                        fin.write(" ".join(sen) + "\n")
+                        fin.write("[Wrong Predicts]\n")
+                        for chunk in wrong_preds:
+                            chunk_word = ""
+                            for i in range(chunk[1], chunk[2]):
+                                chunk_word += sen[i] + " "
+                            fin.write(chunk_word + " " + chunk[0] + "\n")
+                        fin.write("[Not Predicts]\n")
+                        for chunk in not_preds:
+                            chunk_word = ""
+                            for i in range(chunk[1], chunk[2]):
+                                chunk_word += sen[i] + " "
+                            fin.write(chunk_word + " " + chunk[0] + "\n")
+                        fin.write("\n\n")
+                        fin.close()
 
                 def judge_ooxv(chunk):
                     ootv = False
