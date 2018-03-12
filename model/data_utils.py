@@ -234,6 +234,18 @@ def get_trimmed_glove_vectors(filename):
         raise MyIOError(filename)
 
 
+def is_num(word):
+    try:
+        word_num = list(word)
+        while "," in word_num:
+            word_num.remove(",")
+        float("".join(word_num))
+        return True
+    except ValueError:
+        pass
+    return False
+
+
 def get_processing_word(vocab_words=None, vocab_chars=None,
                         lowercase=False, chars=False, allow_unk=True):
     """Return lambda function that transform a word (string) into list,
@@ -258,17 +270,12 @@ def get_processing_word(vocab_words=None, vocab_chars=None,
                 if char in vocab_chars:
                     char_ids += [vocab_chars[char]]
 
-        # 1. preprocess word
+        # 1. pre process word
+
         if lowercase:
             word = word.lower()
-        try:
-            word_num = list(word)
-            while "," in word_num:
-                word_num.remove(",")
-            float("".join(word_num))
+        if is_num(word):
             word = NUM
-        except ValueError:
-            pass
 
         # 2. get id of word
         if vocab_words is not None:
@@ -278,8 +285,7 @@ def get_processing_word(vocab_words=None, vocab_chars=None,
                 if allow_unk:
                     word = vocab_words[UNK]
                 else:
-                    raise Exception("Unknow key is not allowed. Check that " \
-                                    "your vocab (tags?) is correct")
+                    raise Exception("Unknown key is not allowed. Check that your vocab (tags?) is correct")
 
         # 3. return tuple char ids, word id
         if vocab_chars is not None and chars == True:

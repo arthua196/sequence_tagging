@@ -1,10 +1,11 @@
 import numpy as np
-import os
 import tensorflow as tf
 
-from .data_utils import minibatches, pad_sequences, get_chunks
-from .general_utils import Progbar
 from .base_model import BaseModel
+from .data_utils import minibatches, pad_sequences, get_chunks, is_num
+from .general_utils import Progbar
+
+NUM = "$NUM$"
 
 
 class NERModel(BaseModel):
@@ -109,6 +110,46 @@ class NERModel(BaseModel):
                     name="_word_embeddings",
                     dtype=tf.float32,
                     trainable=self.config.train_embeddings)
+
+                if not self.config.train_embeddings and self.config.use_projection:
+                    b = tf.get_variable(
+                        name="b_embedding",
+                        shape=self.config.embeddings.shape,
+                        dtype=tf.float32,
+                        initializer=tf.zeros_initializer(),
+                        trainable=True)
+
+                    if self.config.use_resident:
+                        W = tf.get_variable(
+                            name="W_embedding",
+                            shape=[self.config.dim_word, self.config.dim_word],
+                            # initializer=tf.zeros_initializer(),
+                            dtype=tf.float32,
+                            trainable=True)
+                        if self.config.use_attention:
+                            s = tf.get_variable(
+                                name="s_embedding",
+                                shape=[self.config.dim_word, 1],
+                                dtype=tf.float32,
+                                trainable=True)
+                            alpha = tf.matrix_diag(tf.transpose(tf.sigmoid(tf.matmul(_word_embeddings, s))))[0]
+                            _word_embeddings += tf.matmul(alpha, tf.matmul(_word_embeddings, W) + b)
+                        else:
+                            _word_embeddings += tf.matmul(_word_embeddings, W) + b
+
+                    else:
+                        W = tf.get_variable(
+                            name="W_embedding",
+                            shape=[self.config.dim_word, self.config.dim_word],
+                            # initializer=tf.eye(self.config.dim_word),
+                            dtype=tf.float32,
+                            trainable=True)
+                        _word_embeddings = tf.matmul(_word_embeddings, W) + b
+
+                    if self.config.embedding_projection_type == "linear":
+                        pass
+                    elif self.config.embedding_projection_type == "sigmoid":
+                        _word_embeddings = tf.sigmoid(_word_embeddings)
 
                 if self.config.copy_embeddings:
                     _word_embeddings_temp = tf.Variable(
@@ -358,9 +399,14 @@ class NERModel(BaseModel):
                     ooev = False
                     oobv = False
                     for i in range(chunk[1], chunk[2]):
-                        if not sen[i].lower() in self.config.vocab_trainset_word:
+                        word = sen[i]
+                        if self.config.lowercase:
+                            word = word.lower()
+                        if is_num(word):
+                            word = NUM
+                        if word not in self.config.vocab_trainset_word:
                             ootv = True
-                        if not sen[i].lower() in self.config.vocab_embedding_word:
+                        if word not in self.config.vocab_embedding_word:
                             ooev = True
                         if ootv and ooev:
                             oobv = True

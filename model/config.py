@@ -64,21 +64,21 @@ class Config():
     write_mistake_2file = True
     filename_wrong_preds = dir_output + "wrong_preds.txt"
 
-
+    lowercase = True
     # embeddings
-    dim_word = 300
-    dim_char = 100
+    dim_word = 100
+    dim_char = 40
 
     # glove files
-    filename_glove = "data/glove.6B/glove.6B.{}d.txt".format(dim_word)
+    filename_glove = "../../emb/emb{}.txt".format(dim_word)
     # trimmed embeddings (created from glove_filename with build_data.py)
-    filename_trimmed = "data/glove.6B.{}d.trimmed.npz".format(dim_word)
+    filename_trimmed = "data/emb{}d.trimmed.npz".format(dim_word)
     use_pretrained = True
 
     # dataset
-    filename_dev = "data/conll2003/en/valid.txt"
-    filename_test = "data/conll2003/en/test.txt"
-    filename_train = "data/conll2003/en/train.txt"
+    filename_dev = "data/corpus/valid.txt"
+    filename_test = "data/corpus/test.txt"
+    filename_train = "data/corpus/train.txt"
 
     max_iter = None  # if not None, max number of examples in Dataset
 
@@ -91,14 +91,20 @@ class Config():
     filename_trainset_words = "data/trainset_words.txt"
     filename_embedding_words = "data/embedding_words.txt"
 
-    # training
+    # embedding setting
     train_embeddings = False
     copy_embeddings = False
-    nepochs = 15
+    use_projection = True
+    use_resident = True
+    use_attention = True
+    embedding_projection_type = "linear"
+
+    # training
+    nepochs = 30
     dropout = 0.5
     batch_size = 20
     lr_method = "adam"
-    lr = 0.002
+    lr = 0.0005
     lr_decay = 0.9
     clip = -1  # if negative, no clipping
     nepoch_no_imprv = 3
