@@ -110,46 +110,44 @@ class NERModel(BaseModel):
                     name="_word_embeddings",
                     dtype=tf.float32,
                     trainable=self.config.train_embeddings)
+                _word_embeddings_proj = _word_embeddings
 
-                if not self.config.train_embeddings and self.config.use_projection:
-                    b = tf.get_variable(
-                        name="b_embedding",
-                        shape=self.config.embeddings.shape,
-                        dtype=tf.float32,
-                        initializer=tf.zeros_initializer(),
-                        trainable=True)
-
-                    if self.config.use_resident:
-                        W = tf.get_variable(
-                            name="W_embedding",
-                            shape=[self.config.dim_word, self.config.dim_word],
-                            # initializer=tf.zeros_initializer(),
+                if self.config.use_projection:
+                    if self.config.embedding_projection_type == "linear":
+                        b = tf.get_variable(
+                            name="b_embedding",
+                            shape=self.config.embeddings.shape,
+                            initializer=tf.zeros_initializer(),
                             dtype=tf.float32,
                             trainable=True)
+                        if self.config.projection_w_initilization == "xavier":
+                            W = tf.get_variable(
+                                name="W_embedding",
+                                shape=[self.config.dim_word, self.config.dim_word],
+                                initializer=tf.contrib.layers.xavier_initializer(),
+                                dtype=tf.float32,
+                                trainable=True)
+                        elif self.config.projection_w_initilization == "eye":
+                            W = tf.get_variable(
+                                name="W_embedding",
+                                shape=[self.config.dim_word, self.config.dim_word],
+                                initializer=tf.identity_initializer(),
+                                dtype=tf.float32,
+                                trainable=True)
+                        _word_embeddings_proj = tf.matmul(_word_embeddings, W) + b
+                    elif self.config.embedding_projection_type == "relu":
+                        pass
+
+                    if self.config.use_residual:
                         if self.config.use_attention:
                             s = tf.get_variable(
-                                name="s_embedding",
+                                name="s_attention",
                                 shape=[self.config.dim_word, 1],
                                 dtype=tf.float32,
                                 trainable=True)
-                            alpha = tf.matrix_diag(tf.transpose(tf.sigmoid(tf.matmul(_word_embeddings, s))))[0]
-                            _word_embeddings += tf.matmul(alpha, tf.matmul(_word_embeddings, W) + b)
-                        else:
-                            _word_embeddings += tf.matmul(_word_embeddings, W) + b
-
-                    else:
-                        W = tf.get_variable(
-                            name="W_embedding",
-                            shape=[self.config.dim_word, self.config.dim_word],
-                            # initializer=tf.eye(self.config.dim_word),
-                            dtype=tf.float32,
-                            trainable=True)
-                        _word_embeddings = tf.matmul(_word_embeddings, W) + b
-
-                    if self.config.embedding_projection_type == "linear":
-                        pass
-                    elif self.config.embedding_projection_type == "sigmoid":
-                        _word_embeddings = tf.sigmoid(_word_embeddings)
+                            alpha = tf.matrix_diag(tf.transpose(tf.tanh(tf.matmul(_word_embeddings, s))))[0]
+                            _word_embeddings_proj = tf.matmul(alpha, _word_embeddings_proj)
+                        _word_embeddings_proj += _word_embeddings
 
                 if self.config.copy_embeddings:
                     _word_embeddings_temp = tf.Variable(
@@ -157,9 +155,9 @@ class NERModel(BaseModel):
                         name="_word_embeddings_temp",
                         dtype=tf.float32,
                         trainable=False)
-                    _word_embeddings = tf.concat([_word_embeddings, _word_embeddings_temp], axis=-1)
+                    _word_embeddings_proj = tf.concat([_word_embeddings_proj, _word_embeddings_temp], axis=-1)
 
-            word_embeddings = tf.nn.embedding_lookup(_word_embeddings,
+            word_embeddings = tf.nn.embedding_lookup(_word_embeddings_proj,
                                                      self.word_ids, name="word_embeddings")
 
         with tf.variable_scope("chars"):

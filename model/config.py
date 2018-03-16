@@ -95,9 +95,10 @@ class Config():
     train_embeddings = False
     copy_embeddings = False
     use_projection = True
-    use_resident = True
+    use_residual = True
     use_attention = True
     embedding_projection_type = "linear"
+    projection_w_initilization = "xavier"
 
     # training
     nepochs = 30
