@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import math
 
 from .base_model import BaseModel
 from .data_utils import minibatches, pad_sequences, get_chunks, is_num
@@ -114,12 +115,6 @@ class NERModel(BaseModel):
 
                 if self.config.use_projection:
                     if self.config.embedding_projection_type == "linear":
-                        b = tf.get_variable(
-                            name="b_embedding",
-                            shape=self.config.embeddings.shape,
-                            initializer=tf.zeros_initializer(),
-                            dtype=tf.float32,
-                            trainable=True)
                         if self.config.projection_w_initilization == "xavier":
                             W = tf.get_variable(
                                 name="W_embedding",
@@ -134,9 +129,26 @@ class NERModel(BaseModel):
                                 initializer=tf.identity_initializer(),
                                 dtype=tf.float32,
                                 trainable=True)
-                        _word_embeddings_proj = tf.matmul(_word_embeddings, W) + b
+                        _word_embeddings_proj = tf.matmul(_word_embeddings, W)
+                        out = tf.contrib.layers.batch_norm(_word_embeddings_proj, center=True, scale=True, is_training=True)
+
                     elif self.config.embedding_projection_type == "relu":
-                        pass
+                        W1 = tf.get_variable(
+                            name="W1_embedding",
+                            shape=[self.config.dim_word, self.config.dim_word],
+                            initializer=tf.contrib.layers.xavier_initializer() * math.sqrt(2.0),
+                            dtype=tf.float32,
+                            trainable=True)
+                        out = tf.matmul(_word_embeddings, W1)
+                        out = tf.contrib.layers.batch_norm(out, center=True, scale=True, is_training=True)
+                        out = tf.nn.relu(out)
+                        W2 = tf.get_variable(
+                            name="W2_embedding",
+                            shape=[self.config.dim_word, self.config.dim_word],
+                            initializer=tf.contrib.layers.xavier_initializer() * math.sqrt(2.0),
+                            dtype=tf.float32,
+                            trainable=True)
+                        _word_embeddings_proj = tf.nn.relu(tf.contrib.layers.batch_norm(tf.matmul(out, W2)))
 
                     if self.config.use_residual:
                         if self.config.use_attention:
@@ -192,9 +204,10 @@ class NERModel(BaseModel):
                 # shape = (batch size, max sentence length, char hidden size)
                 output = tf.reshape(output,
                                     shape=[s[0], s[1], 2 * self.config.hidden_size_char])
+                output = tf.nn.dropout(word_embeddings, self.dropout)
                 word_embeddings = tf.concat([word_embeddings, output], axis=-1)
 
-        self.word_embeddings = tf.nn.dropout(word_embeddings, self.dropout)
+        self.word_embeddings = word_embeddings
 
     def add_logits_op(self):
         """Defines self.logits
