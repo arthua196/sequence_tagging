@@ -56,10 +56,10 @@ class Config():
                            if self.use_pretrained else None)
 
     # general config
-    dir_output = "results/test/"
+    dir_output = "results/"
     dir_model = dir_output + "model.weights/"
     path_log = dir_output + "log.txt"
-    dir_evaluate_result = "results/evaluate_result.txt"
+    dir_evaluate_result = dir_output + "evaluate_result.txt"
 
     # for output mistakes in evaluate
     write_mistake_2file = True
