@@ -1,10 +1,11 @@
 from model.config import Config
 from model.data_utils import CoNLLDataset, get_vocabs, UNK, NUM, \
     get_glove_vocab, write_vocab, load_vocab, get_char_vocab, \
-    export_trimmed_glove_vectors, get_processing_word
+    export_trimmed_glove_vectors, get_processing_word, make_fold_data
+import argparse
 
 
-def main():
+def build_data(config=Config(load=False), kth_fold=0):
     """Procedure to build data
 
     You MUST RUN this procedure. It iterates over the whole dataset (train,
@@ -19,8 +20,15 @@ def main():
         config: (instance of Config) has attributes like hyper-params...
 
     """
+    # make k_fold
+    if config.use_k_fold:
+        make_fold_data(config.dir_k_fold, config.k_fold, kth_fold, config.filename_train, config.filename_test)
+
     # get config and processing of words
-    config = Config(load=False)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode', type=int, default=0)
+    args = parser.parse_args()
+    if args.mode: make_fold_data(config.k_fold, args.mode, config.filename_train, config.filename_test)
     processing_word = get_processing_word(lowercase=True)
 
     # Generators
@@ -57,4 +65,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    build_data()

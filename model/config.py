@@ -59,6 +59,7 @@ class Config():
     dir_output = "results/test/"
     dir_model = dir_output + "model.weights/"
     path_log = dir_output + "log.txt"
+    dir_evaluate_result = "results/evaluate_result.txt"
 
     # for output mistakes in evaluate
     write_mistake_2file = True
@@ -91,6 +92,11 @@ class Config():
     filename_trainset_words = "data/trainset_words.txt"
     filename_embedding_words = "data/embedding_words.txt"
 
+    # k fold
+    use_k_fold = True
+    k_fold = 4
+    dir_k_fold = "data/k_fold/"
+
     # embedding setting
     train_embeddings = False
     copy_embeddings = False
@@ -120,5 +126,5 @@ class Config():
 
     # GPU config
     gpuConfig = tf.ConfigProto()
-    gpuConfig.gpu_options.per_process_gpu_memory_fraction = 0.5
+    gpuConfig.gpu_options.per_process_gpu_memory_fraction = 0.7
     gpuConfig.gpu_options.allow_growth = True

@@ -1,12 +1,10 @@
 from model.data_utils import CoNLLDataset
 from model.ner_model import NERModel
 from model.config import Config
+import argparse
 
 
-def main():
-    # create instance of config
-    config = Config()
-
+def train(config = Config()):
     # build model
     model = NERModel(config)
     model.build()
@@ -24,4 +22,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    train()

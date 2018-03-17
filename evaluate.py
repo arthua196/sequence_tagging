@@ -1,6 +1,7 @@
 from model.data_utils import CoNLLDataset
 from model.ner_model import NERModel
 from model.config import Config
+import argparse
 
 
 def align_data(data):
@@ -65,10 +66,7 @@ input> I love Paris""")
             model.logger.info(seq)
 
 
-def main():
-    # create instance of config
-    config = Config()
-
+def evaluate(config = Config()):
     # build model
     model = NERModel(config)
     model.build()
@@ -83,4 +81,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    evaluate()
