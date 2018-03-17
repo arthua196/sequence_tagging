@@ -1,7 +1,6 @@
 from model.data_utils import CoNLLDataset
 from model.ner_model import NERModel
 from model.config import Config
-import argparse
 
 
 def train(config = Config()):

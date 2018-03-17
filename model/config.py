@@ -126,5 +126,5 @@ class Config():
 
     # GPU config
     gpuConfig = tf.ConfigProto()
-    gpuConfig.gpu_options.per_process_gpu_memory_fraction = 0.7
+    gpuConfig.gpu_options.per_process_gpu_memory_fraction = 0.5
     gpuConfig.gpu_options.allow_growth = True

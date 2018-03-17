@@ -2,7 +2,6 @@ from model.config import Config
 from model.data_utils import CoNLLDataset, get_vocabs, UNK, NUM, \
     get_glove_vocab, write_vocab, load_vocab, get_char_vocab, \
     export_trimmed_glove_vectors, get_processing_word, make_fold_data
-import argparse
 
 
 def build_data(config=Config(load=False), kth_fold=0):
@@ -25,10 +24,6 @@ def build_data(config=Config(load=False), kth_fold=0):
         make_fold_data(config.dir_k_fold, config.k_fold, kth_fold, config.filename_train, config.filename_test)
 
     # get config and processing of words
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--mode', type=int, default=0)
-    args = parser.parse_args()
-    if args.mode: make_fold_data(config.k_fold, args.mode, config.filename_train, config.filename_test)
     processing_word = get_processing_word(lowercase=True)
 
     # Generators

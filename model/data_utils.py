@@ -442,9 +442,9 @@ def get_chunks(seq, tags):
 
 
 def make_fold_data(dir, k_fold, x, filename_train, filename_test):
-    train = open(filename_train, "r", encoding="utf-8")
-    test = open(filename_test, "r", encoding="utf-8")
-    for i in range(1, k_fold + 1):
+    train = open(filename_train, "w", encoding="utf-8")
+    test = open(filename_test, "w", encoding="utf-8")
+    for i in range(k_fold):
         with open(dir + str(i) + ".txt", "r", encoding="utf-8") as fin:
             for line in fin:
                 if i == x:
