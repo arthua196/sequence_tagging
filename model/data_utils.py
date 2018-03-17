@@ -443,7 +443,9 @@ def get_chunks(seq, tags):
 
 def make_fold_data(dir, k_fold, x, filename_train, filename_test):
     train = open(filename_train, "w", encoding="utf-8")
+    train.write("-DOCSTART-\n\n")
     test = open(filename_test, "w", encoding="utf-8")
+    test.write("-DOCSTART-\n\n")
     for i in range(k_fold):
         with open(dir + str(i) + ".txt", "r", encoding="utf-8") as fin:
             for line in fin:
