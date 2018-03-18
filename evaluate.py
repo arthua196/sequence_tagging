@@ -65,11 +65,12 @@ input> I love Paris""")
             model.logger.info(seq)
 
 
-def evaluate(config = Config()):
+def evaluate(config=Config(), model=None):
     # build model
-    model = NERModel(config)
-    model.build()
-    model.restore_session(config.dir_model)
+    if model is None:
+        model = NERModel(config)
+        model.build()
+        model.restore_session(config.dir_model)
 
     # create DataSet
     test = CoNLLDataset(config.filename_test, config.processing_word,

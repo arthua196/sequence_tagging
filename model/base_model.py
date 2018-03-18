@@ -141,4 +141,4 @@ class BaseModel(object):
                            for k, v in metrics2.items()])
         self.logger.info(msg + "\n" + msg2)
         with open(self.config.dir_evaluate_result, "a", encoding="utf-8") as fout:
-            fout.write(msg + "\n" + msg2)
+            fout.write(msg + "\n" + msg2 + "\n")

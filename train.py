@@ -3,10 +3,11 @@ from model.ner_model import NERModel
 from model.config import Config
 
 
-def train(config = Config()):
+def train(config=Config(), model=None):
     # build model
-    model = NERModel(config)
-    model.build()
+    if model is None:
+        model = NERModel(config)
+        model.build()
     # model.restore_session("results/crf/model.weights/") # optional, restore weights
     # model.reinitialize_weights("proj")
 
@@ -18,6 +19,7 @@ def train(config = Config()):
 
     # train model
     model.train(train, dev)
+    return model
 
 
 if __name__ == "__main__":

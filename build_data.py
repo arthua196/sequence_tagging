@@ -4,7 +4,7 @@ from model.data_utils import CoNLLDataset, get_vocabs, UNK, NUM, \
     export_trimmed_glove_vectors, get_processing_word, make_fold_data
 
 
-def build_data(config=Config(load=False), kth_fold=0):
+def build_data(config=None, kth_fold=None):
     """Procedure to build data
 
     You MUST RUN this procedure. It iterates over the whole dataset (train,
@@ -20,7 +20,9 @@ def build_data(config=Config(load=False), kth_fold=0):
 
     """
     # make k_fold
-    if config.use_k_fold:
+    if config is None:
+        config = Config(load=False)
+    if config.use_k_fold and kth_fold is not None:
         make_fold_data(config.dir_k_fold, config.k_fold, kth_fold, config.filename_train, config.filename_test)
 
     # get config and processing of words
