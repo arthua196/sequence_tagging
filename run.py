@@ -2,6 +2,7 @@ import os
 from model.config import Config
 
 if __name__ == "__main__":
+    print("Running Path:\t" + os.getcwd())
     config = Config()
     if config.use_k_fold:
         dir_model = config.dir_model
