@@ -3,18 +3,23 @@ from train import train
 from evaluate import evaluate
 from build_data import build_data
 from model.ner_model import NERModel
+import argparse
 
 if __name__ == "__main__":
-    build_data()
     config = Config()
-    model = NERModel(config)
-    model.build()
-    if config.use_k_fold:
-        for i in range(config.k_fold):
-            build_data(kth_fold=i)
-            model.config.dir_model = model.config.dir_model[:-1] + str(i) + "/"
-            train(config, model)
-            evaluate(config, model)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('output', type=str, help='filename of output weights', default=None)
+    parser.add_argument('kth_fold', type=int, help='time of k fold', default=None)
+    args = parser.parse_args()
+
+    if args.output is not None:
+        config.dir_model = args.output
+    if args.kth_fold is not None:
+        build_data(kth_fold=args.kth_fold)
     else:
-        train(model=model)
-        evaluate(model=model)
+        build_data()
+
+    model = NERModel(config)
+    train(model=model)
+    evaluate(model=model)

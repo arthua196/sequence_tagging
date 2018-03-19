@@ -57,7 +57,7 @@ class Config():
 
     # general config
     dir_output = "results/"
-    dir_model = dir_output + "model.weights/"
+    dir_model = dir_output + "model.weights"
     path_log = dir_output + "log.txt"
     dir_evaluate_result = dir_output + "evaluate_result.txt"
 
