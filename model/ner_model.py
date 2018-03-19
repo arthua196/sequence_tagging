@@ -362,6 +362,10 @@ class NERModel(BaseModel):
             metrics: (dict) metrics["acc"] = 98.4, ...
 
         """
+        if write_mistake_2file:
+            fin = open(self.config.filename_wrong_preds, "a")
+            fin.write("-START-\n")
+            fin.close()
         UNK = "$UNK$"
         accs = []
         correct_preds, total_correct, total_preds = 0., 0., 0.

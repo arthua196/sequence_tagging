@@ -2,6 +2,7 @@ import time
 import sys
 import logging
 import numpy as np
+import random
 
 
 def get_logger(filename):

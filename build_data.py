@@ -1,10 +1,12 @@
+import argparse
+
 from model.config import Config
 from model.data_utils import CoNLLDataset, get_vocabs, UNK, NUM, \
     get_glove_vocab, write_vocab, load_vocab, get_char_vocab, \
     export_trimmed_glove_vectors, get_processing_word, make_fold_data
 
 
-def build_data(config=None, kth_fold=None):
+def build_data(kth_fold=None):
     """Procedure to build data
 
     You MUST RUN this procedure. It iterates over the whole dataset (train,
@@ -17,11 +19,11 @@ def build_data(config=None, kth_fold=None):
 
     Args:
         config: (instance of Config) has attributes like hyper-params...
+        :param kth_fold:
 
     """
     # make k_fold
-    if config is None:
-        config = Config(load=False)
+    config = Config(load=False)
     if config.use_k_fold and kth_fold is not None:
         make_fold_data(config.dir_k_fold, config.k_fold, kth_fold, config.filename_train, config.filename_test)
 
@@ -62,4 +64,7 @@ def build_data(config=None, kth_fold=None):
 
 
 if __name__ == "__main__":
-    build_data()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--kth_fold', type=int, help='time of k fold', default=None)
+    args = parser.parse_args()
+    build_data(args.kth_fold)

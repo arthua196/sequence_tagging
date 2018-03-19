@@ -1,8 +1,4 @@
-from model.config import Config
-from train import train
-from evaluate import evaluate
-from build_data import build_data
-from model.ner_model import NERModel
+import os
 import argparse
 
 if __name__ == "__main__":
@@ -13,15 +9,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.kth_fold is not None:
-        build_data(kth_fold=args.kth_fold)
+        os.system("python3 build_data.py --kth_fold " + str(args.kth_fold))
     else:
-        build_data()
+        os.system("python3 build_data.py")
 
-    config = Config()
     if args.output is not None:
-        config.dir_model = args.output
+        os.system("python3 train.py --output " + args.output)
+        os.system("python3 evaluate.py --output " + args.output)
+    else:
+        os.system("python3 train.py")
+        os.system("python3 evaluate.py")
 
-    model = NERModel(config)
-    model.build()
-    train(model=model)
-    evaluate(model=model)

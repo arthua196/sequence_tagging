@@ -1,13 +1,17 @@
+import argparse
+
 from model.data_utils import CoNLLDataset
 from model.ner_model import NERModel
 from model.config import Config
 
 
-def train(config=Config(), model=None):
+def train(dir_model=None):
     # build model
-    if model is None:
-        model = NERModel(config)
-        model.build()
+    config = Config()
+    if dir_model is not None:
+        config.dir_model = dir_model
+    model = NERModel(config)
+    model.build()
     # model.restore_session("results/crf/model.weights/") # optional, restore weights
     # model.reinitialize_weights("proj")
 
@@ -23,4 +27,7 @@ def train(config=Config(), model=None):
 
 
 if __name__ == "__main__":
-    train()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--output', type=str, help='filename of output weights', default=None)
+    args = parser.parse_args()
+    train(dir_model=args.output)

@@ -1,3 +1,5 @@
+import argparse
+
 from model.data_utils import CoNLLDataset
 from model.ner_model import NERModel
 from model.config import Config
@@ -65,12 +67,14 @@ input> I love Paris""")
             model.logger.info(seq)
 
 
-def evaluate(config=Config(), model=None):
+def evaluate(dir_model=None):
     # build model
-    if model is None:
-        model = NERModel(config)
-        model.build()
-        model.restore_session(config.dir_model)
+    config = Config()
+    if dir_model is not None:
+        config.dir_model = dir_model
+    model = NERModel(config)
+    model.build()
+    model.restore_session(config.dir_model)
 
     # create DataSet
     test = CoNLLDataset(config.filename_test, config.processing_word,
@@ -81,4 +85,7 @@ def evaluate(config=Config(), model=None):
 
 
 if __name__ == "__main__":
-    evaluate()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--output', type=str, help='filename of output weights', default=None)
+    args = parser.parse_args()
+    evaluate(dir_model=args.output)
