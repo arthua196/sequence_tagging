@@ -3,7 +3,7 @@ from model.config import Config
 
 if __name__ == "__main__":
     print("Running Path:\t" + os.getcwd())
-    config = Config()
+    config = Config(load=False)
     if config.use_k_fold:
         dir_model = config.dir_model[:-1]
         for i in range(config.k_fold):
