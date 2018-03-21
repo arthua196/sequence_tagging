@@ -130,8 +130,9 @@ class NERModel(BaseModel):
                                 dtype=tf.float32,
                                 trainable=True)
                         _word_embeddings_proj = tf.matmul(_word_embeddings, W)
-                        out = tf.contrib.layers.batch_norm(_word_embeddings_proj, center=True, scale=True,
-                                                           is_training=True)
+                        _word_embeddings_proj = tf.contrib.layers.batch_norm(_word_embeddings_proj, center=True,
+                                                                             scale=True,
+                                                                             is_training=True)
 
                     elif self.config.embedding_projection_type == "relu":
                         W1 = tf.get_variable(
@@ -207,10 +208,9 @@ class NERModel(BaseModel):
                 # shape = (batch size, max sentence length, char hidden size)
                 output = tf.reshape(output,
                                     shape=[s[0], s[1], 2 * self.config.hidden_size_char])
-                output = tf.nn.dropout(word_embeddings, self.dropout)
                 word_embeddings = tf.concat([word_embeddings, output], axis=-1)
 
-        self.word_embeddings = word_embeddings
+        self.word_embeddings = tf.nn.dropout(word_embeddings, self.dropout)
 
     def add_logits_op(self):
         """Defines self.logits
