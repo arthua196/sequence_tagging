@@ -130,13 +130,15 @@ class NERModel(BaseModel):
                                 dtype=tf.float32,
                                 trainable=True)
                         _word_embeddings_proj = tf.matmul(_word_embeddings, W)
-                        out = tf.contrib.layers.batch_norm(_word_embeddings_proj, center=True, scale=True, is_training=True)
+                        out = tf.contrib.layers.batch_norm(_word_embeddings_proj, center=True, scale=True,
+                                                           is_training=True)
 
                     elif self.config.embedding_projection_type == "relu":
                         W1 = tf.get_variable(
                             name="W1_embedding",
                             shape=[self.config.dim_word, self.config.dim_word],
-                            initializer=tf.contrib.layers.xavier_initializer() * math.sqrt(2.0),
+                            initializer=tf.truncated_normal_initializer(
+                                stddev=math.sqrt(2 / self.config.dim_word)),
                             dtype=tf.float32,
                             trainable=True)
                         out = tf.matmul(_word_embeddings, W1)
@@ -145,7 +147,8 @@ class NERModel(BaseModel):
                         W2 = tf.get_variable(
                             name="W2_embedding",
                             shape=[self.config.dim_word, self.config.dim_word],
-                            initializer=tf.contrib.layers.xavier_initializer() * math.sqrt(2.0),
+                            initializer=tf.truncated_normal_initializer(
+                                stddev=math.sqrt(2 / self.config.dim_word)),
                             dtype=tf.float32,
                             trainable=True)
                         _word_embeddings_proj = tf.nn.relu(tf.contrib.layers.batch_norm(tf.matmul(out, W2)))
