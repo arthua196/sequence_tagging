@@ -126,7 +126,7 @@ class NERModel(BaseModel):
                             W = tf.get_variable(
                                 name="W_embedding",
                                 shape=[self.config.dim_word, self.config.dim_word],
-                                initializer=tf.identity_initializer(),
+                                initializer=tf.eye(self.config.dim_word),
                                 dtype=tf.float32,
                                 trainable=True)
                         _word_embeddings_proj = tf.matmul(_word_embeddings, W)
