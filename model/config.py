@@ -71,7 +71,7 @@ class Config():
     dim_char = 40
 
     # glove files
-    filename_glove = "../../emb/emb{}.txt".format(dim_word)
+    filename_glove = "data/emb/emb{}.txt".format(dim_word)
     # trimmed embeddings (created from glove_filename with build_data.py)
     filename_trimmed = "data/emb{}d.trimmed.npz".format(dim_word)
     use_pretrained = True
@@ -107,7 +107,8 @@ class Config():
     projection_w_initilization = "xavier"
 
     # training
-    nepochs = 30
+    nepochs = 1
+    # nepochs = 30
     dropout = 0.5
     batch_size = 20
     lr_method = "adam"
