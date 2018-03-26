@@ -105,6 +105,7 @@ class NERModel(BaseModel):
                     name="_word_embeddings",
                     dtype=tf.float32,
                     shape=[self.config.nwords, self.config.dim_word])
+                _word_embeddings_proj = _word_embeddings
             else:
                 _word_embeddings = tf.Variable(
                     self.config.embeddings,
@@ -125,7 +126,6 @@ class NERModel(BaseModel):
                         elif self.config.projection_w_initilization == "eye":
                             W = tf.get_variable(
                                 name="W_embedding",
-                                shape=[self.config.dim_word, self.config.dim_word],
                                 initializer=tf.eye(self.config.dim_word),
                                 dtype=tf.float32,
                                 trainable=True)
