@@ -117,42 +117,49 @@ class NERModel(BaseModel):
                 if self.config.use_projection:
                     if self.config.embedding_projection_type == "linear":
                         if self.config.projection_w_initilization == "xavier":
-                            W = tf.get_variable(
+                            w = tf.get_variable(
                                 name="W_embedding",
                                 shape=[self.config.dim_word, self.config.dim_word],
                                 initializer=tf.contrib.layers.xavier_initializer(),
                                 dtype=tf.float32,
                                 trainable=True)
+                            _word_embeddings_proj = tf.matmul(_word_embeddings, w)
+                            _word_embeddings_proj = tf.contrib.layers.batch_norm(_word_embeddings_proj, center=True,
+                                                                                 scale=True,
+                                                                                 is_training=True)
                         elif self.config.projection_w_initilization == "eye":
-                            W = tf.get_variable(
+                            w = tf.get_variable(
                                 name="W_embedding",
                                 initializer=tf.eye(self.config.dim_word),
                                 dtype=tf.float32,
                                 trainable=True)
-                        _word_embeddings_proj = tf.matmul(_word_embeddings, W)
-                        _word_embeddings_proj = tf.contrib.layers.batch_norm(_word_embeddings_proj, center=True,
-                                                                             scale=True,
-                                                                             is_training=True)
+                            b = tf.get_variable(
+                                name="b_embedding",
+                                shape=[1, self.config.dim_word],
+                                initializer=tf.zeros_initializer,
+                                dtype=tf.float32,
+                                trainable=True)
+                            _word_embeddings_proj = tf.matmul(_word_embeddings, w) + tf.tile(b, [self.config.nwords, 1])
 
                     elif self.config.embedding_projection_type == "relu":
-                        W1 = tf.get_variable(
+                        w1 = tf.get_variable(
                             name="W1_embedding",
                             shape=[self.config.dim_word, self.config.dim_word],
                             initializer=tf.truncated_normal_initializer(
                                 stddev=math.sqrt(2 / self.config.dim_word)),
                             dtype=tf.float32,
                             trainable=True)
-                        out = tf.matmul(_word_embeddings, W1)
+                        out = tf.matmul(_word_embeddings, w1)
                         out = tf.contrib.layers.batch_norm(out, center=True, scale=True, is_training=True)
                         out = tf.nn.relu(out)
-                        W2 = tf.get_variable(
+                        w2 = tf.get_variable(
                             name="W2_embedding",
                             shape=[self.config.dim_word, self.config.dim_word],
                             initializer=tf.truncated_normal_initializer(
                                 stddev=math.sqrt(2 / self.config.dim_word)),
                             dtype=tf.float32,
                             trainable=True)
-                        _word_embeddings_proj = tf.nn.relu(tf.contrib.layers.batch_norm(tf.matmul(out, W2)))
+                        _word_embeddings_proj = tf.nn.relu(tf.contrib.layers.batch_norm(tf.matmul(out, w2)))
 
                     if self.config.use_residual:
                         if self.config.use_attention:
