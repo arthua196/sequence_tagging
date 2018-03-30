@@ -3,6 +3,7 @@ import time
 from model.config import Config
 
 if __name__ == "__main__":
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     time_start = time.time()
     config = Config(load=False)
     logger = config.logger
