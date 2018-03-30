@@ -1,8 +1,10 @@
+import argparse
+
 from model.config import Config
 import pandas as pd
 
 
-def get_result():
+def get_result(filename=None):
     config = Config(load=False)
     acc = list()
     f1 = list()
@@ -15,7 +17,8 @@ def get_result():
     ootv_num = list()
     ooev_num = list()
     oobv_num = list()
-    with open(config.dir_evaluate_result, "r", encoding="utf-8") as fin:
+    filename = config.dir_evaluate_result if filename is None else filename
+    with open(filename, "r", encoding="utf-8") as fin:
         line_num = 0
         dic = dict()
         for line in fin.readlines():
@@ -55,4 +58,7 @@ def get_result():
 
 
 if __name__ == "__main__":
-    get_result()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dir_evaluate_result', type=str, help='filename of evaluate result', default=None)
+    args = parser.parse_args()
+    get_result(args.dir_evaluate_result)
