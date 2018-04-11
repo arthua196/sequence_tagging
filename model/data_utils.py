@@ -455,3 +455,52 @@ def make_fold_data(dir, k_fold, x, filename_train, filename_test):
                     train.write(line)
     train.close()
     test.close()
+
+
+def judge_ooxv(sen, chunk, lowercase, vocab_trainset_word, vocab_embedding_word):
+    ootv = False
+    ooev = False
+    oobv = False
+    for i in range(chunk[1], chunk[2]):
+        word = sen[i]
+        if lowercase:
+            word = word.lower()
+        if is_num(word):
+            word = NUM
+        if word not in vocab_trainset_word:
+            ootv = True
+        if word not in vocab_embedding_word:
+            ooev = True
+        if ootv and ooev:
+            oobv = True
+            break
+    if oobv:
+        return 0
+    elif ooev:
+        return 1
+    elif ootv:
+        return 2
+    else:
+        return 3
+
+
+def write_prediction(filename_wrong_preds, sen, lab_chunks, lab_pred_chunks):
+    right_preds = lab_chunks & lab_pred_chunks
+    wrong_preds = lab_pred_chunks - right_preds
+    not_preds = lab_chunks - right_preds
+    if len(wrong_preds) != 0 or len(not_preds) != 0:
+        with open(filename_wrong_preds,"a") as fin:
+            fin.write(" ".join(sen) + "\n")
+
+            def write_chunks(title, chunkset, fin):
+                fin.write(title + "\n")
+                for chunk in chunkset:
+                    chunk_word = ""
+                    for i in range(chunk[1], chunk[2]):
+                        chunk_word += sen[i] + " "
+                    fin.write(str(chunk[1]) + "\t" + str(chunk[2]) + "\t" + chunk_word + "\t" + chunk[0] + "\n")
+
+            write_chunks("[Right Predicts]", right_preds, fin)
+            write_chunks("[Wrong Predicts]", wrong_preds, fin)
+            write_chunks("[Not Predicts]", not_preds, fin)
+            fin.write("[end]\n")
