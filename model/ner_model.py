@@ -123,6 +123,7 @@ class NERModel(BaseModel):
                                 initializer=tf.contrib.layers.xavier_initializer(),
                                 dtype=tf.float32,
                                 trainable=True)
+                            self.regularizer = tf.contrib.layers.l2_regularizer(self.config.regularizer_alpha)(w)
                             _word_embeddings_proj = tf.matmul(_word_embeddings, w)
                             _word_embeddings_proj = tf.contrib.layers.batch_norm(_word_embeddings_proj, center=True,
                                                                                  scale=True,
@@ -139,6 +140,8 @@ class NERModel(BaseModel):
                                 initializer=tf.zeros_initializer,
                                 dtype=tf.float32,
                                 trainable=True)
+                            self.regularizer = tf.contrib.layers.l2_regularizer(self.config.regularizer_alpha)(w) + \
+                                               tf.contrib.layers.l2_regularizer(self.config.regularizer_alpha)(b)
                             _word_embeddings_proj = tf.matmul(_word_embeddings, w) + tf.tile(b, [self.config.nwords, 1])
 
                     elif self.config.embedding_projection_type == "relu":
@@ -159,6 +162,8 @@ class NERModel(BaseModel):
                                 stddev=math.sqrt(2 / self.config.dim_word)),
                             dtype=tf.float32,
                             trainable=True)
+                        self.regularizer = tf.contrib.layers.l2_regularizer(self.config.regularizer_alpha)(
+                            w1) + tf.contrib.layers.l2_regularizer(self.config.regularizer_alpha)(w2)
                         _word_embeddings_proj = tf.nn.relu(tf.contrib.layers.batch_norm(tf.matmul(out, w2)))
 
                     if self.config.use_residual:
@@ -273,6 +278,8 @@ class NERModel(BaseModel):
             mask = tf.sequence_mask(self.sequence_lengths)
             losses = tf.boolean_mask(losses, mask)
             self.loss = tf.reduce_mean(losses)
+            if self.config.use_projection and self.config.use_projection_regularizer:
+                self.loss += self.regularizer
 
         # for tensorboard
         tf.summary.scalar("loss", self.loss)
