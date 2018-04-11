@@ -3,7 +3,7 @@ import tensorflow as tf
 import math
 
 from .base_model import BaseModel
-from .data_utils import minibatches, pad_sequences, get_chunks, is_num
+from .data_utils import minibatches, pad_sequences, get_chunks, judge_ooxv, write_prediction
 from .general_utils import Progbar
 
 NUM = "$NUM$"
@@ -380,8 +380,8 @@ class NERModel(BaseModel):
 
         """
         if write_mistake_2file:
-            fin = open(self.config.filename_wrong_preds, "a")
-            fin.write("-START-\n")
+            # clear the file
+            fin = open(self.config.filename_wrong_preds, "w")
             fin.close()
         UNK = "$UNK$"
         accs = []
@@ -405,59 +405,18 @@ class NERModel(BaseModel):
                 total_preds += len(lab_pred_chunks)
                 total_correct += len(lab_chunks)
 
-                wrong_preds = lab_pred_chunks - (lab_chunks & lab_pred_chunks)
-                not_preds = lab_chunks - (lab_chunks & lab_pred_chunks)
                 if write_mistake_2file:
-                    if len(wrong_preds) != 0 or len(not_preds) != 0:
-                        fin = open(self.config.filename_wrong_preds, "a")
-                        fin.write(" ".join(sen) + "\n")
-                        fin.write("[Wrong Predicts]\n")
-                        for chunk in wrong_preds:
-                            chunk_word = ""
-                            for i in range(chunk[1], chunk[2]):
-                                chunk_word += sen[i] + " "
-                            fin.write(chunk_word + " " + chunk[0] + "\n")
-                        fin.write("[Not Predicts]\n")
-                        for chunk in not_preds:
-                            chunk_word = ""
-                            for i in range(chunk[1], chunk[2]):
-                                chunk_word += sen[i] + " "
-                            fin.write(chunk_word + " " + chunk[0] + "\n")
-                        fin.write("\n\n")
-                        fin.close()
-
-                def judge_ooxv(chunk):
-                    ootv = False
-                    ooev = False
-                    oobv = False
-                    for i in range(chunk[1], chunk[2]):
-                        word = sen[i]
-                        if self.config.lowercase:
-                            word = word.lower()
-                        if is_num(word):
-                            word = NUM
-                        if word not in self.config.vocab_trainset_word:
-                            ootv = True
-                        if word not in self.config.vocab_embedding_word:
-                            ooev = True
-                        if ootv and ooev:
-                            oobv = True
-                            break
-                    if oobv:
-                        return 0
-                    elif ooev:
-                        return 1
-                    elif ootv:
-                        return 2
-                    else:
-                        return 3
+                    write_prediction(self.config.filename_wrong_preds, sen, lab_chunks, lab_pred_chunks)
 
                 for chunk in lab_chunks:
-                    total_correct_ooxv[judge_ooxv(chunk)] += 1
+                    total_correct_ooxv[judge_ooxv(sen, chunk, self.config.lowercase, self.config.vocab_trainset_word,
+                                                  self.config.vocab_embedding_word)] += 1
                 for chunk in lab_pred_chunks:
-                    total_preds_ooxv[judge_ooxv(chunk)] += 1
+                    total_preds_ooxv[judge_ooxv(sen, chunk, self.config.lowercase, self.config.vocab_trainset_word,
+                                                self.config.vocab_embedding_word)] += 1
                 for chunk in (lab_pred_chunks & lab_chunks):
-                    correct_preds_ooxv[judge_ooxv(chunk)] += 1
+                    correct_preds_ooxv[judge_ooxv(sen, chunk, self.config.lowercase, self.config.vocab_trainset_word,
+                                                  self.config.vocab_embedding_word)] += 1
 
         pp = correct_preds / total_preds if correct_preds > 0 else 0
         rr = correct_preds / total_correct if correct_preds > 0 else 0
