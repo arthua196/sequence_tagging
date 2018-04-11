@@ -381,7 +381,7 @@ class NERModel(BaseModel):
         """
         if write_mistake_2file:
             # clear the file
-            fin = open(self.config.filename_wrong_preds, "w")
+            fin = open(self.config.filename_wrong_preds, "w", encoding="utf-8")
             fin.close()
         UNK = "$UNK$"
         accs = []
