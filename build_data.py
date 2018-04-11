@@ -42,7 +42,11 @@ def build_data(kth_fold=None):
     # Build Word and Tag vocab
     vocab_words, vocab_tags = get_vocabs([train, dev, test])
     vocab_glove = get_glove_vocab(config.filename_glove)
-    write_vocab(vocab_glove, config.filename_embedding_words)
+    if config.use_pretrained:
+        write_vocab(vocab_glove, config.filename_embedding_words)
+    else:
+        # write_vocab(vocab_words, config.filename_embedding_words)
+        write_vocab(train_set_words, config.filename_embedding_words)
 
     vocab = vocab_words & vocab_glove
     vocab.add(UNK)
