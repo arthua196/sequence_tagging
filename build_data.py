@@ -41,12 +41,12 @@ def build_data(kth_fold=None):
 
     # Build Word and Tag vocab
     vocab_words, vocab_tags = get_vocabs([train, dev, test])
-    vocab_glove = get_glove_vocab(config.filename_glove)
     if config.use_pretrained:
-        write_vocab(vocab_glove, config.filename_embedding_words)
+        vocab_glove = get_glove_vocab(config.filename_glove)
     else:
-        # write_vocab(vocab_words, config.filename_embedding_words)
-        write_vocab(train_set_words, config.filename_embedding_words)
+        vocab_glove = vocab_words
+        # vocab_glove = train_set_words
+    write_vocab(vocab_glove, config.filename_embedding_words)
 
     vocab = vocab_words & vocab_glove
     vocab.add(UNK)
@@ -58,8 +58,9 @@ def build_data(kth_fold=None):
 
     # Trim GloVe Vectors
     vocab = load_vocab(config.filename_words)
-    export_trimmed_glove_vectors(vocab, config.filename_glove,
-                                 config.filename_trimmed, config.dim_word)
+    if config.use_pretrained:
+        export_trimmed_glove_vectors(vocab, config.filename_glove,
+                                     config.filename_trimmed, config.dim_word)
 
     # Build and save char vocab
     train = CoNLLDataset(config.filename_train)
