@@ -21,6 +21,12 @@ def read_sen(filename):
         for line in fin.readlines():
             if line.strip() == END:
                 yield res
+                sen = ""
+                status = "sen"
+                res = dict()
+                res["right"] = list()
+                res["wrong"] = list()
+                res["not"] = list()
             elif line.strip() == RIGHT:
                 status = "right"
             elif line.strip() == WRONG:
@@ -41,11 +47,10 @@ def read_sen(filename):
 
 
 if __name__ == "__main__":
-    for a in read_sen(filename1):
-        b = read_sen(filename2).__next__()
+    for (a, b) in zip(read_sen(filename1), read_sen(filename2)):
         if a["sen"] != b["sen"]:
             print("ERROR: The two sentences are not the same!")
-            exit(1)
+            break
         else:
             s1 = set(a["right"])
             s2 = set(b["right"])
