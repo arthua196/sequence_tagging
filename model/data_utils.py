@@ -489,19 +489,18 @@ def write_prediction(filename_wrong_preds, sen, lab_chunks, lab_pred_chunks):
     right_preds = lab_chunks & lab_pred_chunks
     wrong_preds = lab_pred_chunks - right_preds
     not_preds = lab_chunks - right_preds
-    if len(wrong_preds) != 0 or len(not_preds) != 0:
-        with open(filename_wrong_preds, "a", encoding="utf-8") as fin:
-            fin.write(" ".join(sen) + "\n")
+    with open(filename_wrong_preds, "a", encoding="utf-8") as fin:
+        fin.write(" ".join(sen) + "\n")
 
-            def write_chunks(title, chunkset, fin):
-                fin.write(title + "\n")
-                for chunk in chunkset:
-                    chunk_word = ""
-                    for i in range(chunk[1], chunk[2]):
-                        chunk_word += sen[i] + " "
-                    fin.write(str(chunk[1]) + "\t" + str(chunk[2]) + "\t" + chunk_word + "\t" + chunk[0] + "\n")
+        def write_chunks(title, chunkset, fin):
+            fin.write(title + "\n")
+            for chunk in chunkset:
+                chunk_word = ""
+                for i in range(chunk[1], chunk[2]):
+                    chunk_word += sen[i] + " "
+                fin.write(str(chunk[1]) + "\t" + str(chunk[2]) + "\t" + chunk_word + "\t" + chunk[0] + "\n")
 
-            write_chunks("[Right Predicts]", right_preds, fin)
-            write_chunks("[Wrong Predicts]", wrong_preds, fin)
-            write_chunks("[Not Predicts]", not_preds, fin)
-            fin.write("[end]\n")
+        write_chunks("[Right Predicts]", right_preds, fin)
+        write_chunks("[Wrong Predicts]", wrong_preds, fin)
+        write_chunks("[Not Predicts]", not_preds, fin)
+        fin.write("[end]\n")
