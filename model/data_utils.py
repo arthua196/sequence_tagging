@@ -162,6 +162,7 @@ def write_vocab(vocab, filename):
         write a word per line
 
     """
+    vocab = sorted(vocab)
     print("Writing vocab...")
     with open(filename, "w", encoding="utf8") as f:
         for i, word in enumerate(vocab):
