@@ -120,10 +120,11 @@ class NERModel(BaseModel):
                             w = tf.get_variable(
                                 name="W_embedding",
                                 shape=[self.config.dim_word, self.config.dim_word],
-                                initializer=tf.contrib.layers.xavier_initializer(),
+                                initializer=tf.truncated_normal_initializer(
+                                    stddev=math.sqrt(2 / self.config.dim_word)),
                                 dtype=tf.float32,
                                 trainable=True)
-                            self.regularizer = tf.contrib.layers.l2_regularizer(self.config.regularizer_alpha)(w)
+                            self.regularizer = tf.contrib.layers.l2_regularizer(1.0 / self.config.dim_word)(w)
                             _word_embeddings_proj = tf.matmul(_word_embeddings, w)
                             _word_embeddings_proj = tf.contrib.layers.batch_norm(_word_embeddings_proj, center=True,
                                                                                  scale=True,
@@ -140,8 +141,7 @@ class NERModel(BaseModel):
                                 initializer=tf.zeros_initializer,
                                 dtype=tf.float32,
                                 trainable=True)
-                            self.regularizer = tf.contrib.layers.l2_regularizer(self.config.regularizer_alpha)(w) + \
-                                               tf.contrib.layers.l2_regularizer(self.config.regularizer_alpha)(b)
+                            self.regularizer = tf.contrib.layers.l2_regularizer(1.0 / self.config.dim_word)(w)
                             _word_embeddings_proj = tf.matmul(_word_embeddings, w) + tf.tile(b, [self.config.nwords, 1])
 
                     elif self.config.embedding_projection_type == "relu":
@@ -162,8 +162,8 @@ class NERModel(BaseModel):
                                 stddev=math.sqrt(2 / self.config.dim_word)),
                             dtype=tf.float32,
                             trainable=True)
-                        self.regularizer = tf.contrib.layers.l2_regularizer(self.config.regularizer_alpha)(
-                            w1) + tf.contrib.layers.l2_regularizer(self.config.regularizer_alpha)(w2)
+                        self.regularizer = tf.contrib.layers.l2_regularizer(1.0 / self.config.dim_word)(
+                            w1) + tf.contrib.layers.l2_regularizer(1.0 / self.config.dim_word)(w2)
                         _word_embeddings_proj = tf.nn.relu(tf.contrib.layers.batch_norm(tf.matmul(out, w2)))
 
                     if self.config.use_residual:

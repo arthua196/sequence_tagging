@@ -104,7 +104,6 @@ class Config():
     use_residual = True
     use_attention = True
     use_projection_regularizer = True
-    regularizer_alpha = 0.5
     embedding_projection_type = "linear"
     projection_w_initilization = "xavier"
 
