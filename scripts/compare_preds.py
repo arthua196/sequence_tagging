@@ -68,3 +68,4 @@ if __name__ == "__main__":
                 for i in range(chunk[0], chunk[1]):
                     word += sen[i]
                 print(str(chunk[0]) + "\t" + str(chunk[1]) + "\t" + word + "\t" + chunk[2])
+            print("[end]")
