@@ -51,6 +51,8 @@ def get_result(filename=None):
                            # "ooev_num": ooev_num,
                            # "oobv_num": oobv_num
                            })
+
+        print(str(config.lr) + " " + " ".join(str(i) for i in list(df.mean())))
         print(df)
         print("----------------------------------------\n")
         print(df.describe())
