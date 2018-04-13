@@ -39,6 +39,8 @@ def get_result(filename=None):
                 oobv_num.append(dic["oobv_num"])
                 dic = dict()
             line_num += 1
+            if line_num == config.k_fold * 2:
+                break
         df = pd.DataFrame({"acc": acc,
                            "f1": f1,
                            "iv_f1": iv_f1,
@@ -53,9 +55,9 @@ def get_result(filename=None):
                            })
 
         print(str(config.lr) + " " + " ".join(str(i) for i in list(df.mean())))
-        print(df)
-        print("----------------------------------------\n")
-        print(df.describe())
+        # print(df)
+        # print("----------------------------------------\n")
+        # print(df.describe())
     return df
 
 
