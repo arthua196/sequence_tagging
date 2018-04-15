@@ -108,7 +108,7 @@ class Config():
     projection_w_initilization = "xavier"
 
     # training
-    nepochs = 1
+    nepochs = 50
     # nepochs = 30
     dropout = 0.5
     batch_size = 20
@@ -116,7 +116,7 @@ class Config():
     lr = 0.0005
     lr_decay = 0.9
     clip = -1  # if negative, no clipping
-    nepoch_no_imprv = 3
+    nepoch_no_imprv = 5
 
     # model hyperparameters
     hidden_size_char = 100  # lstm on chars
