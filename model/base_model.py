@@ -1,3 +1,4 @@
+import shutil
 import os
 import tensorflow as tf
 
@@ -75,9 +76,14 @@ class BaseModel(object):
 
     def save_session(self):
         """Saves session = weights"""
-        if not os.path.exists(self.config.dir_model):
-            os.makedirs(self.config.dir_model)
-        self.saver.save(self.sess, self.config.dir_model)
+        if not os.path.exists(self.config.dir_model_temp):
+            os.makedirs(self.config.dir_model_temp)
+        else:
+            if os.path.exists(self.config.dir_model):
+                shutil.rmtree(self.config.dir_model)
+            os.rename(self.config.dir_model_temp, self.config.dir_model)
+            os.makedirs(self.config.dir_model_temp)
+        self.saver.save(self.sess, self.config.dir_model_temp)
 
     def close_session(self):
         """Closes the session"""
