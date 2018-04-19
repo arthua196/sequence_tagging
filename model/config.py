@@ -109,11 +109,10 @@ class Config():
 
     # training
     nepochs = 50
-    # nepochs = 30
     dropout = 0.5
-    batch_size = 20
+    batch_size = 16
     lr_method = "adam"
-    lr = 0.0005
+    lr = 0.001
     lr_decay = 0.9
     clip = -1  # if negative, no clipping
     nepoch_no_imprv = 5
