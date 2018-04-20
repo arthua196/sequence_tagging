@@ -112,7 +112,7 @@ class Config():
     nepochs = 50
     dropout = 0.5
     batch_size = 16
-    lr_method = "adam"
+    lr_method = "nadam"
     lr = 0.001
     lr_decay = 0.9
     clip = -1  # if negative, no clipping

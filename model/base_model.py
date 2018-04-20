@@ -46,6 +46,8 @@ class BaseModel(object):
                 optimizer = tf.train.GradientDescentOptimizer(lr)
             elif _lr_m == 'rmsprop':
                 optimizer = tf.train.RMSPropOptimizer(lr)
+            elif _lr_m == 'nadam':
+                optimizer = tf.contrib.opt.NadamOptimizer(lr)
             else:
                 raise NotImplementedError("Unknown method {}".format(_lr_m))
 
