@@ -78,14 +78,17 @@ class BaseModel(object):
 
     def save_session(self):
         """Saves session = weights"""
-        if not os.path.exists(self.config.dir_model_temp):
-            os.makedirs(self.config.dir_model_temp)
-        else:
-            if os.path.exists(self.config.dir_model):
-                shutil.rmtree(self.config.dir_model)
-            os.rename(self.config.dir_model_temp, self.config.dir_model)
-            os.makedirs(self.config.dir_model_temp)
-        self.saver.save(self.sess, self.config.dir_model_temp)
+        if not os.path.exists(self.config.dir_model):
+            os.makedirs(self.config.dir_model)
+        self.saver.save(self.sess, self.config.dir_model)
+
+    def save_session2(self):
+        """Saves session = weights"""
+        if not os.path.exists(self.config.dir_2nd_model):
+            os.makedirs(self.config.dir_2nd_model)
+        sess_2nd = tf.Session(config=self.config.gpuConfig)
+        self.saver.restore(sess_2nd, self.config.dir_model)
+        self.saver.save(sess_2nd, self.config.dir_2nd_model)
 
     def close_session(self):
         """Closes the session"""
@@ -123,11 +126,15 @@ class BaseModel(object):
 
             # early stopping and saving best parameters
             if score >= best_score:
+                if best_score != 0:
+                    self.save_session2()
                 nepoch_no_imprv = 0
                 self.save_session()
                 best_score = score
                 self.logger.info("- new best score!")
             else:
+                self.restore_session(self.config.dir_2nd_model)
+                self.save_session()
                 nepoch_no_imprv += 1
                 if nepoch_no_imprv >= self.config.nepoch_no_imprv:
                     self.logger.info("- early stopping {} epochs without " \

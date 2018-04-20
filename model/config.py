@@ -57,8 +57,8 @@ class Config():
 
     # general config
     dir_output = "results/"
-    dir_model_temp = dir_output + "model.weights_temp"
     dir_model = dir_output + "model.weights"
+    dir_2nd_model = dir_output + "model_2nd.weights"
     path_log = dir_output + "log.txt"
     dir_evaluate_result = dir_output + "evaluate_result.txt"
 
@@ -109,7 +109,7 @@ class Config():
     projection_w_initilization = "xavier"
 
     # training
-    nepochs = 50
+    nepochs = 2
     dropout = 0.5
     batch_size = 16
     lr_method = "nadam"
