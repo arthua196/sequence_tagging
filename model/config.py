@@ -94,25 +94,26 @@ class Config():
     filename_embedding_words = "data/embedding_words.txt"
 
     # k fold
-    use_k_fold = True
+    use_k_fold = False
     k_fold = 4
     dir_k_fold = "data/k_fold/"
 
     # embedding setting
     train_embeddings = False
     copy_embeddings = False
-    use_projection = True
-    use_residual = True
-    use_attention = True
-    use_projection_regularizer = True
+    use_projection = False
+    use_residual = False
+    use_attention = False
+    use_projection_regularizer = False
     embedding_projection_type = "linear"
     projection_w_initilization = "xavier"
 
     # training
     nepochs = 2
+    # nepochs = 50
     dropout = 0.5
     batch_size = 16
-    lr_method = "nadam"
+    lr_method = "adam"
     lr = 0.001
     lr_decay = 0.9
     clip = -1  # if negative, no clipping

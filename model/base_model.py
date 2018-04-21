@@ -76,13 +76,13 @@ class BaseModel(object):
         self.logger.info("Reloading the latest trained model...")
         self.saver.restore(self.sess, dir_model)
 
-    def save_session(self):
+    def save_session(self, dir_model):
         """Saves session = weights"""
-        if not os.path.exists(self.config.dir_model):
-            os.makedirs(self.config.dir_model)
-        self.saver.save(self.sess, self.config.dir_model)
+        if not os.path.exists(dir_model):
+            os.makedirs(dir_model)
+        self.saver.save(self.sess, dir_model)
 
-    def save_session2(self):
+    def transfer_best_session_to_2nd(self):
         """Saves session = weights"""
         if not os.path.exists(self.config.dir_2nd_model):
             os.makedirs(self.config.dir_2nd_model)
@@ -114,6 +114,7 @@ class BaseModel(object):
 
         """
         best_score = 0
+        second_score = 0
         nepoch_no_imprv = 0  # for early stopping
         self.add_summary()  # tensorboard
 
@@ -127,16 +128,20 @@ class BaseModel(object):
             # early stopping and saving best parameters
             if score >= best_score:
                 if best_score != 0:
-                    self.save_session2()
+                    second_score = best_score
+                    self.transfer_best_session_to_2nd()
                 nepoch_no_imprv = 0
-                self.save_session()
+                self.save_session(self.config.dir_model)
                 best_score = score
                 self.logger.info("- new best score!")
             else:
-                self.restore_session(self.config.dir_2nd_model)
-                self.save_session()
+                if score >= second_score:
+                    second_score = score
+                    self.save_session(self.config.dir_2nd_model)
                 nepoch_no_imprv += 1
                 if nepoch_no_imprv >= self.config.nepoch_no_imprv:
+                    self.restore_session(self.config.dir_2nd_model)
+                    self.save_session(self.config.dir_model)
                     self.logger.info("- early stopping {} epochs without " \
                                      "improvement".format(nepoch_no_imprv))
                     break
