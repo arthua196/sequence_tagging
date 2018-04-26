@@ -81,6 +81,7 @@ class Config():
     filename_dev = "data/corpus/valid.txt"
     filename_test = "data/corpus/test.txt"
     filename_train = "data/corpus/train.txt"
+    filename_questions = "data/questions-words.txt"
 
     max_iter = None  # if not None, max number of examples in Dataset
 

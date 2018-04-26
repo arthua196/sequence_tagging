@@ -185,6 +185,7 @@ class NERModel(BaseModel):
                         trainable=False)
                     _word_embeddings_proj = tf.concat([_word_embeddings_proj, _word_embeddings_temp], axis=-1)
 
+            self.word_embeddings_proj = _word_embeddings_proj
             word_embeddings = tf.nn.embedding_lookup(_word_embeddings_proj,
                                                      self.word_ids, name="word_embeddings")
 
@@ -452,3 +453,9 @@ class NERModel(BaseModel):
         preds = [self.idx_to_tag[idx] for idx in list(pred_ids[0])]
 
         return preds
+
+    def get_embeddings(self, test):
+        for words, _, _ in minibatches(test, self.config.batch_size):
+            fd, sequence_lengths = self.get_feed_dict(words, dropout=1.0)
+            word_embeddings = self.sess.run(self.word_embeddings_proj, feed_dict=fd)
+            return word_embeddings
